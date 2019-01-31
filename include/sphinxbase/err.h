@@ -153,6 +153,8 @@ err_logfp_cb(void * user_data, err_lvl_t level, const char *fmt, ...);
 
 typedef void (*err_cb_f)(void* user_data, err_lvl_t, const char *, ...);
 
+typedef void (*err_cb_formatted_f)(err_lvl_t, const char* msg);
+
 /**
  * Sets function to output error messages. Use it to redirect the logging
  * to your application. By default the handler which dumps messages to
@@ -163,6 +165,15 @@ typedef void (*err_cb_f)(void* user_data, err_lvl_t, const char *, ...);
  */
 SPHINXBASE_EXPORT void
 err_set_callback(err_cb_f callback, void *user_data);
+
+/**
+ * DOJO:
+ * Sets a function that receives preformatted log strings.
+ * This allows us to easily redirect log output to C# without having to deal with
+ * variadic arguments and calling vsprintf etc.
+ */
+SPHINXBASE_EXPORT void
+err_set_callback_formatted(err_cb_formatted_f callback);
 
 /**
  * Direct all logging to a given filehandle if default logfp callback is set.

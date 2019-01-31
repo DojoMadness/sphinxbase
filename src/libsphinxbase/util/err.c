@@ -77,6 +77,8 @@ static err_cb_f err_cb = err_logfp_cb;
 #endif
 static void* err_user_data;
 
+static err_cb_formatted_f err_cb_formatted = NULL;
+
 void
 err_msg(err_lvl_t lvl, const char *path, long ln, const char *fmt, ...)
 {
@@ -279,4 +281,32 @@ err_set_callback(err_cb_f cb, void* user_data)
 {
     err_cb = cb;
     err_user_data= user_data;
+}
+
+void
+err_callback_formatted_handler(void* user_data, err_lvl_t lvl, const char * fmt, ...)
+{
+	if (err_cb_formatted == NULL) {
+		va_list args;
+		// Forward to original log function.
+		err_logfp_cb(user_data, lvl, fmt, args);
+	}
+	else
+	{
+		va_list args;
+		char msg[2048];
+		va_start(args, fmt);
+		vsnprintf(msg, sizeof(msg), fmt, args);
+		va_end(args);
+		err_cb_formatted(lvl, msg);
+	}
+}
+
+void
+err_set_callback_formatted(err_cb_formatted_f cb)
+{
+	err_cb_formatted = cb;
+	// err_cb is called by the original code.
+	// err_callback_formatted_handler preformats the output and passes it on to err_cb_formatted.
+	err_cb = err_callback_formatted_handler;
 }
